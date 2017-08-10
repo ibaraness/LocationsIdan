@@ -1,0 +1,21 @@
+ <div class="row spacer">
+     
+    <div class="col-md-12">
+      <div class="row">
+        <div class="col-md-1"><label><input type="checkbox" /> All</label></div>
+        <div class="col-md-2"><a href="#">
+          <span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span>Name</a>
+        </div>
+        
+        <div class="col-md-3">Address</div>
+        <div class="col-md-3">Coordinates</div>
+        <div class="col-md-2">Category</div>
+      </div>
+      <hr>
+      <!--[Location List Start]-->
+      <div *ngFor="let c of count">
+        <app-location></app-location>
+      </div>
+      <!--[Location List End]-->
+    </div>
+  </div>
