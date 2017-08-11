@@ -13,7 +13,7 @@ export class LocalStorageService {
    * Fetch data from local storage
    * @param name The reference name of the data to be fetched
    */
-  public get(name:string):Array<object>{
+  public get(name:string):any{
     const locations = localStorage.getItem(name);
     if(locations){
       return JSON.parse(locations);

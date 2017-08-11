@@ -1,0 +1,8 @@
+.navbar-collapse {
+    max-height: 0px !important;
+    transition: max-height 1s;
+}
+.navbar-collapse.open-menu{
+    max-height: 500px !important;
+    transition: max-height 1s;
+}

@@ -1,3 +1,24 @@
-<p>
-  categories works!
-</p>
+<div class="row spacer">
+     
+    <div class="col-md-5">
+      <div class="row">
+        <div class="col-md-2 col-xs-2"><label><input type="checkbox" /> All</label></div>
+        <div class="col-md-5 col-xs-5"><a href="#">
+          <span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span>Name</a>
+        </div>
+        <div class="col-md-5 col-xs-5">Color</div>
+      </div>
+      <hr>
+      <!--[Category List Start]-->
+      <div *ngFor="let category of categories; let i = index">
+        <div class="row">
+          <div class="col-md-2 col-xs-2"><label><input [value]="i" type="checkbox" /></label></div>
+          <div class="col-md-5 col-xs-5">
+            <a routerLink="/locations/{{category.name}}">{{category.name}}</a>
+          </div>
+          <div class="col-md-5 col-xs-4" [ngStyle]="{'background-color':category.color}">{{category.color}}</div>
+        </div>
+      </div>
+      <!--[Category List End]-->
+    </div>
+  </div>

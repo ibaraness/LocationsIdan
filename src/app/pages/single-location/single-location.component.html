@@ -1,0 +1,18 @@
+<div *ngIf="location">
+  <div class="row spacer">
+    <div class="col-xs-4">Name</div>
+    <div class="col-xs-8">{{location.name}}</div>
+  </div>
+  <div class="row">
+    <div class="col-xs-4">Address</div>
+    <div class="col-xs-8">{{location.address}}</div>
+  </div>
+  <div class="row">
+    <div class="col-xs-4">Coordinates</div>
+    <div class="col-xs-8">{{location.coordinates}}</div>
+  </div>
+  <div class="row">
+    <div class="col-xs-4">Category</div>
+    <div class="col-xs-8">{{location.category[0]}}</div>
+  </div>
+</div>
