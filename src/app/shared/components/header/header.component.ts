@@ -5,6 +5,8 @@ import { Action } from './../../../constants/enums';
 import "rxjs/add/operator/filter";
 import R from 'ramda';
 import { ActionModel } from "app/models/interfaces";
+import { BsModalRef, BsModalService } from "ngx-bootstrap";
+import { ConfirmModalComponent } from "app/shared/components/confirm-modal/confirm-modal.component";
 
 const pageParams = {
   "Locations":"category",
@@ -18,13 +20,16 @@ const pageParams = {
 })
 export class HeaderComponent implements OnInit {
 
+  bsModalRef: BsModalRef;
+
   pageName:string;
   pageParam:string;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private storeService: StoreService
+    private storeService: StoreService,
+    private modalService: BsModalService
   ) { }
 
   ngOnInit() {
@@ -39,7 +44,21 @@ export class HeaderComponent implements OnInit {
         console.log("pageName", this.pageName, pageParams[this.pageName]);
         console.log("sdaa", this.pageParam)
       }
+
+      this.storeService.changes.subscribe(data => {
+        if(data && data.type === Action.SHOW_CONFIRM_MODAL){
+          this.storeService.update(null);
+          this.openModal(data.data.title,data.data.content, data.data.action);
+        }
+      })
     });
+  }
+
+  public openModal(title:string, content:string, action:ActionModel) {
+    this.bsModalRef = this.modalService.show(ConfirmModalComponent);
+    this.bsModalRef.content.title = title;
+    this.bsModalRef.content.content = content;
+    this.bsModalRef.content.action = action;
   }
 
   edit(){

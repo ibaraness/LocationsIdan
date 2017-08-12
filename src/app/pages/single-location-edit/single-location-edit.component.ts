@@ -1,10 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { FormGroup, FormControl, Validators, FormBuilder } from '@angular/forms';
 import { DataService } from './../../shared/services/data.service';
-import { LocationModel } from './../../models/interfaces';
+import { LocationModel, ActionModel } from './../../models/interfaces';
 import { Location } from '@angular/common';
 import { ActivatedRoute, ParamMap } from "@angular/router";
 import 'rxjs/add/operator/switchMap';
+import { StoreService } from "app/shared/services/store.service";
+import { Action } from "./../../constants/enums";
+import { BsModalRef, BsModalService } from "ngx-bootstrap";
+import { ConfirmModalComponent } from "app/shared/components/confirm-modal/confirm-modal.component";
 
 @Component({
   selector: 'app-single-location-edit',
@@ -13,7 +17,10 @@ import 'rxjs/add/operator/switchMap';
 })
 export class SingleLocationEditComponent implements OnInit {
 
-  private activeLocation:LocationModel;
+  @Input() activeLocation:LocationModel;
+  @Input() refererPage;
+
+  bsModalRef: BsModalRef;
 
   categories:any = [];
 
@@ -34,7 +41,9 @@ export class SingleLocationEditComponent implements OnInit {
     formBuilder:FormBuilder, 
     private dataService:DataService, 
     private route: ActivatedRoute,
-    private locationService:Location
+    private locationService:Location,
+    private storeService: StoreService,
+    private modalService: BsModalService
   ) { 
     this.form = formBuilder.group({
       "name": this.name,
@@ -43,36 +52,59 @@ export class SingleLocationEditComponent implements OnInit {
       "category":this.category
     });
   }
+
+  public openModal(title:string, content:string, action:ActionModel) {
+    this.bsModalRef = this.modalService.show(ConfirmModalComponent);
+    this.bsModalRef.content.title = title;
+    this.bsModalRef.content.content = content;
+    this.bsModalRef.content.action = action;
+  }
   
   /**
    * Fetch values if exist
    */
   ngOnInit() {
 
-    // const ltest:Location = {name:'asd',address:'s',coordinates:'s',category:['d']};
-
-    // console.log("Exist", this.dataService.locationExist(ltest));
-
     /**
      * Fetch available catagories
      */
     this.categories = this.dataService.getCategories();
 
+
     /**
-     * Check if location was passed for editing in URL
+     * Check if location was passed for editing in URL or by Input
      */
-    this.route.paramMap.subscribe(paramMap => {
-      this.activeLocation = this.dataService.getLocation(paramMap.get('location'));
-      if(this.activeLocation){
-        this.name.setValue(this.activeLocation.name);
-        this.address.setValue(this.activeLocation.address);
-        this.coordinates.setValue(this.activeLocation.coordinates);
-        this.category.setValue(this.activeLocation.category[0]);
+    if(this.activeLocation){
+      this.fillFormFields();
+    }else {
+      this.route.paramMap.subscribe(paramMap => {
+        this.activeLocation = this.dataService.getLocation(paramMap.get('location'));
+        if(this.activeLocation){
+          this.fillFormFields();
+        }
+      });
+    }
+    
+    this.storeService.changes.subscribe(data => {
+      if(data && data.pageName === 'Location'){
+        if(data.type === Action.COMPLETE){
+          this.storeService.update(null);
+          this.locationService.back();
+        }else if(data.type === Action.CONFIRM_OVERWRITE && data.data.location){
+          this.dataService.setLocation(data.data.location);
+          this.complete();
+        }
       }
     });
+  }
 
-    //Test - get location from database
-    //console.log("dsf", this.dataService.getLocation('Home'));
+  private fillFormFields(){
+    if(this.activeLocation){
+      this.name.setValue(this.activeLocation.name);
+      this.address.setValue(this.activeLocation.address);
+      this.coordinates.setValue(this.activeLocation.coordinates);
+      this.category.setValue(this.activeLocation.category[0]);
+    }
   }
   onSubmit(){
     console.log("Submited!", this.form.valid);
@@ -83,27 +115,44 @@ export class SingleLocationEditComponent implements OnInit {
       "coordinates":this.coordinates.value,
       "category":[this.category.value]
     };
-
+    /**
+     * If we choose a new location with the same name of other location already exist
+     */
     if(!this.activeLocation && this.dataService.locationExist(location.name) >= 0){
-      let overwrite = confirm("A location with that Name already exist! \n Do you want to ovewrite it?");
-      if(overwrite){
-        this.dataService.setLocation(location);
-        this.locationService.back();
+      // let overwrite = confirm("A location with that Name already exist! \n Do you want to ovewrite it?");
+      // if(overwrite){
+      //   this.dataService.setLocation(location);
+      //   this.complete();
+      // }
+      const am:ActionModel = {
+        type: Action.CONFIRM_OVERWRITE ,
+        pageName:this.refererPage || 'Location', 
+        data:{
+          location
+        }
       }
-    }else if(this.activeLocation){
-      console.log("Location changes Was saved, going back", this.dataService.locationExist(this.activeLocation.name));
+      this.openModal("Location exist", "A location with that Name already exist! \n Do you want to ovewrite it?", am);
+    }
+    /**
+     * If we are editing existing location from the start
+     */
+    else if(this.activeLocation){
       this.dataService.setLocation(location, this.activeLocation.name);
-      this.locationService.back();
+      this.complete();
     }else {
       this.dataService.setLocation(location);
-      console.log("Save", this.dataService.locationExist(location.name));
-      this.locationService.back();
-      alert("Location Was saved")
+      this.complete();
+      //alert("Location Was saved")
     }
   }
-
-  cancel(){
-    this.locationService.back();
+  complete(){
+    const am:ActionModel = {
+      type: Action.COMPLETE ,
+      pageName:this.refererPage || 'Location', 
+      data:{locationName:this.activeLocation && this.activeLocation.name || ''}
+    }
+    this.storeService.update(am);
+    //this.locationService.back();
   }
 
 }

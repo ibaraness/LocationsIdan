@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { DataService } from './../../shared/services/data.service';
-import { LocationModel } from './../../models/interfaces';
+import { LocationModel, ActionModel } from './../../models/interfaces';
 import { ActivatedRoute, Router } from "@angular/router";
 import { StoreService } from './../../shared/services/store.service';
 import { Action } from './../../constants/enums';
@@ -8,6 +8,7 @@ import { Action } from './../../constants/enums';
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { BsModalRef } from 'ngx-bootstrap/modal/modal-options.class';
 import { ModalComponent } from './../../shared/components/modal/modal.component';
+import { ConfirmModalComponent } from "app/shared/components/confirm-modal/confirm-modal.component";
 
 @Component({
   selector: 'app-locations',
@@ -22,6 +23,8 @@ export class LocationsComponent implements OnInit {
   byCategory:string;
   checkAll = false;
 
+  private selectedLocations:Array<string> = [];
+
   activeSorting = "name";
   ascendingNameSorting = true;
   ascendingCategorySorting = false;
@@ -35,14 +38,10 @@ export class LocationsComponent implements OnInit {
   ) { }
 
   public openModalWithComponent() {
-    let list = ['Open a modal with component', 'Pass your data', 'Do something else', '...'];
-    this.bsModalRef = this.modalService.show(ModalComponent);
-    this.bsModalRef.content.title = 'Modal with component';
-    this.bsModalRef.content.list = list;
-    setTimeout(() => {
-      list.push('PROFIT!!!');
-    }, 2000);
-}
+    this.bsModalRef = this.modalService.show(ConfirmModalComponent);
+    this.bsModalRef.content.title = "Confirm Box";
+    this.bsModalRef.content.content = "Do you really want to delete all?"
+  }
 
   ngOnInit() {
     this.locations = this.dataService.getLocations();
@@ -66,12 +65,35 @@ export class LocationsComponent implements OnInit {
         if(data.type === Action.EDIT){
           this.storeService.update(null);
           console.log("Edit locations");
+
         }else if(data.type === Action.NEW){
           this.storeService.update(null);
           this.router.navigate(['/single-location-edit']);
+
         }else if(data.type === Action.CHANGE){
           this.storeService.update(null);
           this.refreshLocations();
+        }
+        else if(data.type === Action.REMOVE){
+          if(this.selectedLocations.length){
+            //console.log("SHOW_CONFIRM_MODAL")
+            const am:ActionModel = {
+              type:Action.SHOW_CONFIRM_MODAL,
+              pageName:'Locations',
+              data:{
+                title:'Remove Location',
+                content:'Are you sure you want to delete location(s)?',
+                action:{
+                  type:Action.APPROVE_DELETE,
+                  pageName:'Locations',
+                  data:this.selectedLocations
+                }
+              }
+            };
+            this.storeService.update(am);
+            this.selectedLocations = [];
+          }
+          
         }
       } 
     });
@@ -110,5 +132,15 @@ export class LocationsComponent implements OnInit {
     this.ascendingNameSorting = !this.ascendingNameSorting;
     this.sortByName('category');
     this.activeSorting = 'category';
+  }
+
+  updateSelectedLocations(e){
+    const index = this.selectedLocations.indexOf(e.name);
+    if(e.checked && index < 0){
+      this.selectedLocations.push(e.name);
+    }else if(!e.checked && index >= 0){
+      this.selectedLocations.splice(index,1);
+    }
+    console.log("updateSelectedLocations", e, this.selectedLocations);
   }
 }

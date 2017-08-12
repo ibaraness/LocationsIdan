@@ -31,10 +31,9 @@
       </div>
       <hr>
       <!--[Location List Start]-->
-      <div *ngFor="let location of locations; let i = index" [ngClass]="{'row-odd':(i%2)}">
-        <app-location [checked]="checkAll" [location]="location" ></app-location>
+      <div *ngFor="let location of locations; let i = index" class="location-row" [ngClass]="{'row-odd':(i%2)}">
+        <app-location [checked]="checkAll" [location]="location" (selectionChanged)="updateSelectedLocations($event)" ></app-location>
       </div>
       <!--[Location List End]-->
-      <button type="button" class="btn btn-primary" (click)="openModalWithComponent()">Create modal with component</button>
     </div>
   </div>

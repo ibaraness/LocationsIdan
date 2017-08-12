@@ -5,7 +5,7 @@ import { ActionModel } from "app/models/interfaces";
 @Injectable()
 export class StoreService {
 
-  private store = new BehaviorSubject<ActionModel>(null);
+  public store = new BehaviorSubject<ActionModel>(null);
   public changes = this.store.asObservable();
 
   constructor() { 

@@ -2,5 +2,10 @@ export enum Action {
     EDIT,
     REMOVE,
     NEW,
-    CHANGE
+    CREATED,
+    CHANGE,
+    COMPLETE,
+    APPROVE_DELETE,
+    CONFIRM_OVERWRITE,
+    SHOW_CONFIRM_MODAL
 }

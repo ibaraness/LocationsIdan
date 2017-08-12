@@ -5,10 +5,12 @@
   </button>
 </div>
 <div class="modal-body">
-  <ul *ngIf="list.length">
+  <p>{{content}}</p>
+  <!-- <ul *ngIf="list.length">
     <li *ngFor="let item of list">{{item}}</li>
-  </ul>
+  </ul> -->
 </div>
 <div class="modal-footer">
-  <button type="button" class="btn btn-default" (click)="bsModalRef.hide()">Close</button>
+  <button type="button" class="btn btn-default" (click)="bsModalRef.hide()">No</button>
+  <button type="button" class="btn btn-primary" (click)="approvedAction()">Yes</button>
 </div>

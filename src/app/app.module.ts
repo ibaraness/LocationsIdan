@@ -18,6 +18,8 @@ import { SingleLocationComponent } from './pages/single-location/single-location
 import { SingleLocationEditComponent } from './pages/single-location-edit/single-location-edit.component';
 import { StoreService } from './shared/services/store.service';
 import { ModalComponent } from './shared/components/modal/modal.component';
+import { ConfirmModalComponent } from './shared/components/confirm-modal/confirm-modal.component';
+import { GoogleMapsComponent } from './shared/components/google-maps/google-maps.component';
 
 @NgModule({
   declarations: [
@@ -30,8 +32,10 @@ import { ModalComponent } from './shared/components/modal/modal.component';
     FooterComponent,
     SingleLocationComponent,
     SingleLocationEditComponent,
+    ConfirmModalComponent,
+    GoogleMapsComponent,
   ],
-  entryComponents:[ModalComponent],
+  entryComponents:[ModalComponent, ConfirmModalComponent],
   imports: [
     BrowserModule,
     FormsModule,

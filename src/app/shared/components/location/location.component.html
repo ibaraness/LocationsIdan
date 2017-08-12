@@ -1,4 +1,4 @@
-<div class="row">
+<div *ngIf="!editMode" class="row">
   <div class="col-md-1 col-xs-2"><label><input type="checkbox" (change)="changed($event)" [checked]="checked" /></label></div>
   <div class="col-md-2 col-xs-5">
     <a routerLink="/single-location/{{location.name}}">{{location.name}}</a>
@@ -7,4 +7,6 @@
   <div class="col-md-3 hidden-xs">{{location.coordinates}}</div>
   <div class="col-md-2 col-xs-5">{{location.category[0]}}</div>
 </div>
-<!-- <app-single-location-edit></app-single-location-edit> -->
+<div *ngIf="editMode" class="edit-row">
+  <app-single-location-edit [refererPage]="'Locations'" [activeLocation]="location"></app-single-location-edit>
+</div>
