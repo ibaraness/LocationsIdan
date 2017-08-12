@@ -1,9 +1,9 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, OnDestroy } from '@angular/core';
 import { FormGroup, FormControl, Validators, FormBuilder } from '@angular/forms';
 import { DataService } from './../../shared/services/data.service';
 import { LocationModel, ActionModel } from './../../models/interfaces';
 import { Location } from '@angular/common';
-import { ActivatedRoute, ParamMap } from "@angular/router";
+import { ActivatedRoute, ParamMap, Router } from "@angular/router";
 import 'rxjs/add/operator/switchMap';
 import { StoreService } from "app/shared/services/store.service";
 import { Action } from "./../../constants/enums";
@@ -15,7 +15,9 @@ import { ConfirmModalComponent } from "app/shared/components/confirm-modal/confi
   templateUrl: './single-location-edit.component.html',
   styleUrls: ['./single-location-edit.component.css']
 })
-export class SingleLocationEditComponent implements OnInit {
+export class SingleLocationEditComponent implements OnInit, OnDestroy {
+
+  private storeSubscription;
 
   @Input() activeLocation:LocationModel;
   @Input() refererPage;
@@ -37,10 +39,13 @@ export class SingleLocationEditComponent implements OnInit {
   coordinates:FormControl = new FormControl("", Validators.required);
   category:FormControl = new FormControl("default", [Validators.required, Validators.pattern(/^(?!default)/g)]);
 
+  dirtyProgramatically = false;
+
   constructor(
     formBuilder:FormBuilder, 
     private dataService:DataService, 
     private route: ActivatedRoute,
+    private router: Router,
     private locationService:Location,
     private storeService: StoreService,
     private modalService: BsModalService
@@ -85,7 +90,7 @@ export class SingleLocationEditComponent implements OnInit {
       });
     }
     
-    this.storeService.changes.subscribe(data => {
+    this.storeSubscription = this.storeService.store.subscribe(data => {
       if(data && data.pageName === 'Location'){
         if(data.type === Action.COMPLETE){
           this.storeService.update(null);
@@ -93,6 +98,15 @@ export class SingleLocationEditComponent implements OnInit {
         }else if(data.type === Action.CONFIRM_OVERWRITE && data.data.location){
           this.dataService.setLocation(data.data.location);
           this.complete();
+        }else if(data.type === Action.COORDINATES_DONE){
+          const location = data.data.location;
+          if(location){
+            this.name.setValue(location.name || "");
+            this.address.setValue(location.address || "");
+            this.coordinates.setValue(location.coordinates || "");
+            this.category.setValue(location.category.length && location.category[0] || "");
+            this.dirtyProgramatically = true;
+          }
         }
       }
     });
@@ -106,6 +120,7 @@ export class SingleLocationEditComponent implements OnInit {
       this.category.setValue(this.activeLocation.category[0]);
     }
   }
+
   onSubmit(){
     console.log("Submited!", this.form.valid);
 
@@ -145,6 +160,24 @@ export class SingleLocationEditComponent implements OnInit {
       //alert("Location Was saved")
     }
   }
+
+  getCoordinatesFromMap(){
+    const location:LocationModel = {
+      "name":this.name.value,
+      "address":this.address.value,
+      "coordinates":this.coordinates.value,
+      "category":[this.category.value]
+    };
+    const am:ActionModel = {
+      type: Action.SET_COORDINATES ,
+      pageName:this.refererPage || 'Location', 
+      data:{location}
+    }
+    this.router.navigate(['/map']).then(()=>{
+      this.storeService.update(am);
+    });
+  }
+
   complete(){
     const am:ActionModel = {
       type: Action.COMPLETE ,
@@ -153,6 +186,10 @@ export class SingleLocationEditComponent implements OnInit {
     }
     this.storeService.update(am);
     //this.locationService.back();
+  }
+
+  ngOnDestroy(): void {
+    this.storeSubscription.unsubscribe();
   }
 
 }

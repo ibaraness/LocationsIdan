@@ -1,4 +1,5 @@
 /* You can add global styles to this file, and also import other style files */
 .spacer {  margin-top: 40px; }
-
-body { padding-bottom: 70px; }
+body { 
+    padding-bottom: 70px;
+}

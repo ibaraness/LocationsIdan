@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { DataService } from './../../shared/services/data.service';
 import { LocationModel, ActionModel } from './../../models/interfaces';
 import { ActivatedRoute, Router } from "@angular/router";
@@ -15,7 +15,7 @@ import { ConfirmModalComponent } from "app/shared/components/confirm-modal/confi
   templateUrl: './locations.component.html',
   styleUrls: ['./locations.component.css']
 })
-export class LocationsComponent implements OnInit {
+export class LocationsComponent implements OnInit, OnDestroy {
 
   bsModalRef: BsModalRef;
   
@@ -25,9 +25,13 @@ export class LocationsComponent implements OnInit {
 
   private selectedLocations:Array<string> = [];
 
+  private storeSubscription;
+
   activeSorting = "name";
   ascendingNameSorting = true;
   ascendingCategorySorting = false;
+
+  times = 0;
 
   constructor(
     private dataService:DataService,
@@ -60,29 +64,35 @@ export class LocationsComponent implements OnInit {
     /**
      * Subscribe for actions from header toolbar
      */
-    this.storeService.changes.subscribe(data => {
+    this.storeSubscription = this.storeService.changes.subscribe(data => {
       if(data && data.pageName === 'Locations'){
-        if(data.type === Action.EDIT){
-          this.storeService.update(null);
-          console.log("Edit locations");
-
-        }else if(data.type === Action.NEW){
+        /**
+         * Create a new location
+         */
+        if(data.type === Action.NEW){
           this.storeService.update(null);
           this.router.navigate(['/single-location-edit']);
-
-        }else if(data.type === Action.CHANGE){
+        }
+        /**
+         * Update the list on change
+         */
+        else if(data.type === Action.CHANGE){
           this.storeService.update(null);
           this.refreshLocations();
         }
+        /**
+         * Remove item(s)
+         */
         else if(data.type === Action.REMOVE){
           if(this.selectedLocations.length){
-            //console.log("SHOW_CONFIRM_MODAL")
+            console.log("SHOW_CONFIRM_MODAL times:", this.times)
             const am:ActionModel = {
               type:Action.SHOW_CONFIRM_MODAL,
               pageName:'Locations',
               data:{
                 title:'Remove Location',
                 content:'Are you sure you want to delete location(s)?',
+                count:++this.times,
                 action:{
                   type:Action.APPROVE_DELETE,
                   pageName:'Locations',
@@ -94,6 +104,8 @@ export class LocationsComponent implements OnInit {
             this.selectedLocations = [];
           }
           
+        }else {
+          //console.log("Action in Locations", data)
         }
       } 
     });
@@ -142,5 +154,9 @@ export class LocationsComponent implements OnInit {
       this.selectedLocations.splice(index,1);
     }
     console.log("updateSelectedLocations", e, this.selectedLocations);
+  }
+
+  ngOnDestroy(): void {
+    this.storeSubscription.unsubscribe();
   }
 }

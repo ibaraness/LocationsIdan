@@ -14,7 +14,7 @@
         <div class="input-group">
           <input type="text" class="form-control" formControlName="coordinates" placeholder="Coordinates">
           <span class="input-group-btn">
-            <button class="btn btn-secondary" type="button">
+            <button class="btn btn-secondary" type="button" (click)="getCoordinatesFromMap()">
               <span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span>Map
             </button>
           </span>
@@ -35,7 +35,7 @@
         </div>
         
       </div>
-      <button type="submit" [disabled]="!form.valid || !form.dirty" class="btn btn-default">Save</button>
+      <button type="submit" [disabled]="!form.valid || !form.dirty || !dirtyProgramatically && !form.valid" class="btn btn-default">Save</button>
       <button type="button" class="btn btn-default" (click)="complete()">Cancel</button>
     </form>
   </div>

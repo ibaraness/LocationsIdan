@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { LocalStorageService } from './local-storage.service';
-import { LocationModel, Category } from './../../models/interfaces';
+import { LocationModel, CategoryModel } from './../../models/interfaces';
 const fakeData = {
   locations:[
     {
@@ -74,7 +74,7 @@ export class DataService {
   /**
    * Get all categories
    */
-  public getCategories():Array<Category>{
+  public getCategories():Array<CategoryModel>{
     return this.localStorageService.get('categories');
   }
 
@@ -82,7 +82,16 @@ export class DataService {
     return this.getCategories().findIndex(c => c.name === name);
   }
 
-  public setCategory(category:Category, name:string = null){
+  public removeCategoty(category:CategoryModel){
+    const exist = this.categoryExist(category.name);
+    if(exist >= 0){
+      const categories = this.getCategories();
+      categories.splice(exist,1);
+      this.localStorageService.set('categories', categories);
+    } 
+  }
+
+  public setCategory(category:CategoryModel, name:string = null){
     const exist = this.categoryExist(name || category.name);
     const categories  = this.getCategories();
     if(exist >= 0){
@@ -92,15 +101,6 @@ export class DataService {
     }
     this.localStorageService.set('categories', categories);
   }
-
-  // public setSelectedCategory(name:string){
-  //   this.localStorageService.set('selectedCategory', name);
-  // }
-
-  // public getSelectedCategory(){
-  //   const name:string = this.localStorageService.get('selectedCategory');
-  //   return this.getCategories().find(category => category.name === name);
-  // }
 
   public addCategory(name:string, color:string = '#ffffff'):Array<object>{
     //TODO: Chaeck that there are no duplicates

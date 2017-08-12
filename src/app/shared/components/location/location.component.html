@@ -1,7 +1,8 @@
 <div *ngIf="!editMode" class="row">
   <div class="col-md-1 col-xs-2"><label><input type="checkbox" (change)="changed($event)" [checked]="checked" /></label></div>
   <div class="col-md-2 col-xs-5">
-    <a routerLink="/single-location/{{location.name}}">{{location.name}}</a>
+    <!-- <a routerLink="/single-location/{{location.name}}">{{location.name}}</a> -->
+    <button class="btn btn-link" (click)="click()">{{location.name}}</button>
   </div>
   <div class="col-md-3 hidden-xs">{{location.address}}</div>
   <div class="col-md-3 hidden-xs">{{location.coordinates}}</div>

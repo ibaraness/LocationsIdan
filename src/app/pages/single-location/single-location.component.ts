@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from "@angular/router";
 import { DataService } from './../../shared/services/data.service';
 import { LocationModel } from './../../models/interfaces';
@@ -10,9 +10,10 @@ import { Action } from './../../constants/enums';
   templateUrl: './single-location.component.html',
   styleUrls: ['./single-location.component.css']
 })
-export class SingleLocationComponent implements OnInit {
+export class SingleLocationComponent implements OnInit, OnDestroy {
 
   location:LocationModel;
+  private storeSubscription;
 
   constructor(
     private dataService:DataService, 
@@ -33,7 +34,7 @@ export class SingleLocationComponent implements OnInit {
     /**
      * Subscribe for actions from header toolbar
      */
-    this.storeService.changes.subscribe(data => {
+    this.storeSubscription = this.storeService.changes.subscribe(data => {
       if(data && data.pageName === 'Location'){
         if(data.type === Action.EDIT){
           if(this.location){
@@ -51,6 +52,10 @@ export class SingleLocationComponent implements OnInit {
       }
       
     });
+  }
+
+  ngOnDestroy(): void {
+    this.storeSubscription.unsubscribe();
   }
 
 }

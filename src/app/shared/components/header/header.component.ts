@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute, NavigationEnd, Params, PRIMARY_OUTLET } from "@angular/router";
 import { StoreService } from './../../services/store.service';
 import { Action } from './../../../constants/enums';
@@ -18,12 +18,15 @@ const pageParams = {
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.css']
 })
-export class HeaderComponent implements OnInit {
+export class HeaderComponent implements OnInit, OnDestroy {
 
   bsModalRef: BsModalRef;
 
   pageName:string;
   pageParam:string;
+  private storeSubscription;
+
+  count = 0;
 
   constructor(
     private route: ActivatedRoute,
@@ -33,6 +36,7 @@ export class HeaderComponent implements OnInit {
   ) { }
 
   ngOnInit() {
+    console.log("ngOnInit ngOnInit asdasdsdasdasad")
      //subscribe to the NavigationEnd event
     this.router.events.filter(event => event instanceof NavigationEnd).subscribe(event => {
       
@@ -45,16 +49,34 @@ export class HeaderComponent implements OnInit {
         console.log("sdaa", this.pageParam)
       }
 
-      this.storeService.changes.subscribe(data => {
+      this.storeSubscription = this.storeService.store.subscribe(data => {
+        /**
+         * Show confirmation modal
+         */
         if(data && data.type === Action.SHOW_CONFIRM_MODAL){
-          this.storeService.update(null);
+          //this.storeService.update(null);
+          console.log("SHOW_CONFIRM_MODAL", ++this.count)
           this.openModal(data.data.title,data.data.content, data.data.action);
+        }
+        /**
+         * Show location on map
+         */
+        else if(data && data.type === Action.SHOW_ON_MAP && data.pageName === 'Locations'){
+          this.router.navigate(['/map']).then(()=>{
+            const am:ActionModel = {
+              type:Action.EDIT,
+              pageName:'Map',
+              data:{location:data.data.location}
+            }
+            this.storeService.update(am);
+          });
         }
       })
     });
   }
 
   public openModal(title:string, content:string, action:ActionModel) {
+    console.log("openModal", action)
     this.bsModalRef = this.modalService.show(ConfirmModalComponent);
     this.bsModalRef.content.title = title;
     this.bsModalRef.content.content = content;
@@ -84,5 +106,9 @@ export class HeaderComponent implements OnInit {
       data:this.pageParam
     }
     this.storeService.update(am);
+  }
+
+  ngOnDestroy(): void {
+    this.storeSubscription.unsubscribe();
   }
 }

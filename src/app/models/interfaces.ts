@@ -7,13 +7,19 @@ export interface LocationModel {
     category:Array<string>
 }
 
-export interface Category {
+export interface CategoryModel {
     name:string,
-    color:string
+    // color:string
 }
 
 export interface ActionModel {
     type:Action,
     pageName:string,
     data:any
+}
+
+export interface DynamicScriptModel {
+    src:string,
+    loaded:boolean,
+    status:string
 }

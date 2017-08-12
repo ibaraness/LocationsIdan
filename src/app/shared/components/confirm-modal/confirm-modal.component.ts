@@ -25,4 +25,9 @@ export class ConfirmModalComponent {
       this.storeService.update(this.action);
     }
   }
+
+  public disapprove(){
+    this.bsModalRef.hide();
+    this.storeService.update(null);
+  }
 }

@@ -9,7 +9,7 @@ export class StoreService {
   public changes = this.store.asObservable();
 
   constructor() { 
-     
+
   }
 
   update(value:any){

@@ -20,6 +20,12 @@ import { StoreService } from './shared/services/store.service';
 import { ModalComponent } from './shared/components/modal/modal.component';
 import { ConfirmModalComponent } from './shared/components/confirm-modal/confirm-modal.component';
 import { GoogleMapsComponent } from './shared/components/google-maps/google-maps.component';
+import { RoutingModule } from "app/shared/routing/routing/routing.module";
+import { DynamicScriptLoaderService } from "app/shared/services/dynamic-script-loader.service";
+import { GoogleMapsService } from "app/shared/services/google-maps.service";
+import { SingleCategoryEditComponent } from './pages/single-category-edit/single-category-edit.component';
+import { CategoryComponent } from './shared/components/category/category.component';
+
 
 @NgModule({
   declarations: [
@@ -34,6 +40,8 @@ import { GoogleMapsComponent } from './shared/components/google-maps/google-maps
     SingleLocationEditComponent,
     ConfirmModalComponent,
     GoogleMapsComponent,
+    SingleCategoryEditComponent,
+    CategoryComponent,
   ],
   entryComponents:[ModalComponent, ConfirmModalComponent],
   imports: [
@@ -42,61 +50,16 @@ import { GoogleMapsComponent } from './shared/components/google-maps/google-maps
     HttpModule,
     ReactiveFormsModule,
     ModalModule.forRoot(),
-    RouterModule.forRoot([
-      { path:'', redirectTo: '/categories', pathMatch: 'full'},
-      {
-        path:'locations',
-        component:LocationsComponent,
-        data:{
-          pageName:'Locations'
-        }
-      },
-      {
-        path:'locations/:category',
-        component:LocationsComponent,
-        data:{
-          pageName:'Locations'
-        }
-      },
-      {
-        path:'categories',
-        component: CategoriesComponent,
-        data:{
-          pageName:'Categories'
-        }
-      },
-      {
-        path:'single-location',
-        component:SingleLocationComponent,
-        data:{
-          pageName:'Location'
-        }
-        
-      },
-      {
-        path:'single-location/:location',
-        component:SingleLocationComponent,
-        data:{
-          pageName:'Location'
-        }
-      },
-      {
-        path:'single-location-edit',
-        component:SingleLocationEditComponent,
-        data:{
-          pageName:'Location'
-        }
-      },
-      {
-        path:'single-location-edit/:location',
-        component:SingleLocationEditComponent,
-        data:{
-          pageName:'Location'
-        }
-      }
-    ])
+    RoutingModule,
   ],
-  providers: [LocalStorageService, DataService, StoreService, BsModalRef],
+  providers: [
+    LocalStorageService, 
+    DataService, 
+    StoreService, 
+    BsModalRef, 
+    DynamicScriptLoaderService,
+    GoogleMapsService
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
