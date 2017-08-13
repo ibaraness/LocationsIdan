@@ -10,7 +10,7 @@
         <input type="text" class="form-control" formControlName="color" placeholder="Color">
       </div> -->
       <button type="submit" [disabled]="!form.valid || !form.dirty || !dirtyProgramatically && !form.valid" class="btn btn-default">Save</button>
-      <button type="button" class="btn btn-default" (click)="complete()">Cancel</button>
+      <button type="button" class="btn btn-default" (click)="cancelEdit()">Cancel</button>
     </form>
   </div>
 </div> 

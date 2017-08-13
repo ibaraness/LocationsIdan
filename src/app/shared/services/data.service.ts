@@ -43,7 +43,7 @@ export class DataService {
   }
 
   public locationExist(name:string):number{
-    return this.getLocations().findIndex(l => l.name === name);
+    return this.getLocations().findIndex(l => l.name.toLowerCase() === name.toLowerCase());
   }
 
   public removeLocation(location:LocationModel){
@@ -53,6 +53,15 @@ export class DataService {
       locations.splice(exist,1);
       this.localStorageService.set('locations', locations);
     } 
+  }
+
+  public removeCategoryLocations(categoryName:string){
+    const locations = this.getLocations(categoryName);
+    if(locations.length){
+      locations.forEach(location =>{
+        this.removeLocation(location);
+      })
+    }
   }
 
   /**
@@ -78,8 +87,12 @@ export class DataService {
     return this.localStorageService.get('categories');
   }
 
+  public getCategory(name:string):CategoryModel{
+    return this.getCategories().find(c => c.name === name);
+  }
+
   public categoryExist(name:string):number{
-    return this.getCategories().findIndex(c => c.name === name);
+    return this.getCategories().findIndex(c => c.name.toLowerCase() === name.toLowerCase());
   }
 
   public removeCategoty(category:CategoryModel){
@@ -88,6 +101,7 @@ export class DataService {
       const categories = this.getCategories();
       categories.splice(exist,1);
       this.localStorageService.set('categories', categories);
+      this.removeCategoryLocations(category.name);
     } 
   }
 

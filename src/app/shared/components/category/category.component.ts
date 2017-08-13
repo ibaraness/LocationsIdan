@@ -41,6 +41,14 @@ export class CategoryComponent implements OnInit {
           this.editMode = true;
         }
         /**
+         * Cancel edit location(disable edit mode)
+         */
+        else if(data.type === Action.CANCEL_EDIT 
+          && data.data.categoryName && data.data.categoryName === this.category.name){
+          this.storeService.update(null);
+          this.editMode = false;
+        }
+        /**
          * Remove location
          */
         // else if(data.type === Action.REMOVE){
@@ -52,9 +60,21 @@ export class CategoryComponent implements OnInit {
         //   const am:ActionModel = Object.assign({}, data, {type:Action.CHANGE})
         //   this.storeService.update(am);
         // }
+        // else if(data.type === Action.COMPLETE && data.data.categoryName && data.data.categoryName === this.category.name){
+        //   this.editMode = false;
+        // }
         else if(data.type === Action.COMPLETE && data.data.categoryName && data.data.categoryName === this.category.name){
           this.editMode = false;
+          const am: ActionModel = {
+            type:Action.CHANGE_SINGLE_CATEGORY,
+            pageName:'Categories',
+            data:data.data
+          }
+          this.storeService.update(am);
         }
+        /**
+         * Id deletion of a location was approved, delete it
+         */
         else if(data.type === Action.APPROVE_DELETE && Array.isArray(data.data) && data.data.indexOf(this.category.name) >= 0){
           console.log(this.category.name + " Approved for deletion");
           this.dataService.removeCategoty(this.category);

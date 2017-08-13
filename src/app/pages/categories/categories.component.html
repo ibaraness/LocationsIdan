@@ -3,14 +3,22 @@
     <div class="col-md-5">
       <div class="row">
         <div class="col-md-2 col-xs-2"><label><input type="checkbox" (change)="selectAll($event)" /> All</label></div>
-        <div class="col-md-5 col-xs-5"><a href="#">
-          <span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span>Name</a>
+        <div class="col-md-5 col-xs-5">
+          <button class="btn-link" (click)="toggleNameSort($event)">
+            <span class="glyphicon " 
+            [ngClass]="
+            {
+              'glyphicon-triangle-bottom':ascendingNameSorting, 
+              'glyphicon-triangle-top':!ascendingNameSorting
+            }" 
+            aria-hidden="true"></span>Name
+          </button>
         </div>
         <!-- <div class="col-md-5 col-xs-5">Color</div> -->
       </div>
       <hr>
       <!--[Category List Start]-->
-      <div *ngFor="let category of categories; let i = index">
+      <div *ngFor="let category of categories; let i = index" class="category-row" [ngClass]="{'row-odd':(i%2)}">
         <app-category [category]="category" [checked]="checkAll" (selectionChanged)="updateSelectedCategories($event)"></app-category>
       </div>
       <!--[Category List End]-->

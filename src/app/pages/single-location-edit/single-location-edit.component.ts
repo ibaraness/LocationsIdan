@@ -90,8 +90,14 @@ export class SingleLocationEditComponent implements OnInit, OnDestroy {
       });
     }
     
+    /**
+     * Listen for store events
+     */
     this.storeSubscription = this.storeService.store.subscribe(data => {
       if(data && data.pageName === 'Location'){
+        /**
+         * If an action was completed, go back to previous page
+         */
         if(data.type === Action.COMPLETE){
           this.storeService.update(null);
           this.locationService.back();
@@ -122,16 +128,21 @@ export class SingleLocationEditComponent implements OnInit, OnDestroy {
   }
 
   onSubmit(){
-    console.log("Submited!", this.form.valid);
+    //console.log("Submited!", this.form.valid);
 
+    /**
+     * Create a new location for saving in database
+     */
     const location:LocationModel = {
       "name":this.name.value,
       "address":this.address.value,
       "coordinates":this.coordinates.value,
       "category":[this.category.value]
     };
+
     /**
-     * If we choose a new location with the same name of other location already exist
+     * If we choose a new location with the same name of other location that already exist,
+     * Ask the user if he wants to overwrite it
      */
     if(!this.activeLocation && this.dataService.locationExist(location.name) >= 0){
       // let overwrite = confirm("A location with that Name already exist! \n Do you want to ovewrite it?");
@@ -153,10 +164,14 @@ export class SingleLocationEditComponent implements OnInit, OnDestroy {
      */
     else if(this.activeLocation){
       this.dataService.setLocation(location, this.activeLocation.name);
-      this.complete();
-    }else {
+      this.complete(location.name);
+    }
+    /**
+     * If we are saving a new unique location
+     */
+    else {
       this.dataService.setLocation(location);
-      this.complete();
+      this.complete(location.name);
       //alert("Location Was saved")
     }
   }
@@ -178,14 +193,27 @@ export class SingleLocationEditComponent implements OnInit, OnDestroy {
     });
   }
 
-  complete(){
+  complete(newLocationName:string = null){
     const am:ActionModel = {
       type: Action.COMPLETE ,
       pageName:this.refererPage || 'Location', 
-      data:{locationName:this.activeLocation && this.activeLocation.name || ''}
+      data:{
+        locationName:this.activeLocation && this.activeLocation.name || '',
+        newLocationName
+      }
     }
     this.storeService.update(am);
-    //this.locationService.back();
+  }
+
+  cancelEdit(){
+    const am:ActionModel = {
+      type: Action.CANCEL_EDIT ,
+      pageName:this.refererPage || 'Location', 
+      data:{
+        locationName:this.activeLocation && this.activeLocation.name || ''
+      }
+    }
+    this.storeService.update(am);
   }
 
   ngOnDestroy(): void {

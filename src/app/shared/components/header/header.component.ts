@@ -56,31 +56,28 @@ export class HeaderComponent implements OnInit, OnDestroy {
         if(data && data.type === Action.SHOW_CONFIRM_MODAL){
           //this.storeService.update(null);
           console.log("SHOW_CONFIRM_MODAL", ++this.count)
-          this.openModal(data.data.title,data.data.content, data.data.action);
+          this.openModal(data.data.title,data.data.content, data.data.action, data.data.extraContent, data.data.cancelAction);
         }
         /**
          * Show location on map
          */
         else if(data && data.type === Action.SHOW_ON_MAP && data.pageName === 'Locations'){
-          this.router.navigate(['/map']).then(()=>{
-            const am:ActionModel = {
-              type:Action.EDIT,
-              pageName:'Map',
-              data:{location:data.data.location}
-            }
-            this.storeService.update(am);
+          this.router.navigate(['/map/' + data.data.location.name]).then(()=>{
+            this.storeService.update(null);
           });
         }
       })
     });
   }
 
-  public openModal(title:string, content:string, action:ActionModel) {
+  public openModal(title:string, content:string, action:ActionModel, extraContent:string = null, cancelAction:ActionModel = null) {
     console.log("openModal", action)
     this.bsModalRef = this.modalService.show(ConfirmModalComponent);
     this.bsModalRef.content.title = title;
     this.bsModalRef.content.content = content;
+    this.bsModalRef.content.extraContent = extraContent;
     this.bsModalRef.content.action = action;
+    this.bsModalRef.content.cancelAction = cancelAction;
   }
 
   edit(){

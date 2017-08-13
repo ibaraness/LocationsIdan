@@ -12,7 +12,9 @@ export class ConfirmModalComponent {
 
   public title: string;
   public content: string;
+  public extraContent: string;
   public action: ActionModel;
+  public cancelAction: ActionModel;
   constructor(
     public bsModalRef: BsModalRef,
     private storeService: StoreService
@@ -24,10 +26,14 @@ export class ConfirmModalComponent {
     if(this.action){
       this.storeService.update(this.action);
     }
+    this.storeService.update(null);
   }
 
   public disapprove(){
     this.bsModalRef.hide();
+    if(this.cancelAction){
+      this.storeService.update(this.cancelAction);
+    }
     this.storeService.update(null);
   }
 }

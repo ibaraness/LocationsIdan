@@ -62,7 +62,7 @@ export class LocationsComponent implements OnInit, OnDestroy {
     });
 
     /**
-     * Subscribe for actions from header toolbar
+     * Listen for store events
      */
     this.storeSubscription = this.storeService.changes.subscribe(data => {
       if(data && data.pageName === 'Locations'){
@@ -79,6 +79,14 @@ export class LocationsComponent implements OnInit, OnDestroy {
         else if(data.type === Action.CHANGE){
           this.storeService.update(null);
           this.refreshLocations();
+        }
+        /**
+         * Update a single location on list
+         */
+        else if(data.type === Action.CHANGE_SINGLE_LOCATION){
+          const index = this.locations.findIndex(l => l.name === data.data.locationName);
+          this.locations[index] = this.dataService.getLocation(data.data.newLocationName);
+          this.storeService.update(null);
         }
         /**
          * Remove item(s)
@@ -102,9 +110,13 @@ export class LocationsComponent implements OnInit, OnDestroy {
             };
             this.storeService.update(am);
             this.selectedLocations = [];
-          }
-          
-        }else {
+          }     
+        }
+        else if(data.type === Action.NAVIGATION && data.data.path){
+          this.storeService.update(null);
+          this.router.navigate([data.data.path]);
+        }
+        else {
           //console.log("Action in Locations", data)
         }
       } 

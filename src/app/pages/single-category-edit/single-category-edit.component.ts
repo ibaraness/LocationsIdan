@@ -4,7 +4,7 @@ import { DataService } from "app/shared/services/data.service";
 import { ActivatedRoute, Router } from "@angular/router";
 import { StoreService } from "app/shared/services/store.service";
 import { BsModalRef, BsModalService } from "ngx-bootstrap";
-import { CategoryModel, ActionModel } from "app/models/interfaces";
+import { CategoryModel, ActionModel, LocationModel } from "app/models/interfaces";
 import { Action } from "./../../constants/enums";
 import { Location } from '@angular/common';
 import { ConfirmModalComponent } from "app/shared/components/confirm-modal/confirm-modal.component";
@@ -106,13 +106,30 @@ export class SingleCategoryEditComponent implements OnInit {
      * If we are editing existing category from the start
      */
     else if(this.activeCategory){
+      this.updateCategoryLocations(category.name);
       this.dataService.setCategory(category, this.activeCategory.name);
-      this.complete();
-    }else {
+      this.complete(category.name);
+    }
+    /**
+     * Creating a unique category
+     */
+    else {
       this.dataService.setCategory(category);
-      this.complete();
+      this.complete(category.name);
       //alert("Location Was saved")
     }
+  }
+
+  updateCategoryLocations(categoryName:string){
+    const locations:LocationModel[] = this.dataService.getLocations(this.activeCategory.name);
+    locations.forEach((location, index, arr)=>{
+      const catIndex = location.category.indexOf(this.activeCategory.name);
+      arr[index].category[catIndex] = categoryName;
+      this.dataService.setLocation(Object.assign({},location,{
+        category:arr[index].category
+      }))
+    });
+    
   }
 
   public openModal(title:string, content:string, action:ActionModel) {
@@ -122,11 +139,26 @@ export class SingleCategoryEditComponent implements OnInit {
     this.bsModalRef.content.action = action;
   }
 
-  complete(){
+  complete(newCategoryName:string = null){
     const am:ActionModel = {
       type: Action.COMPLETE ,
       pageName:this.refererPage || 'Category', 
-      data:{categoryName:this.activeCategory && this.activeCategory.name || ''}
+      data:{
+        categoryName:this.activeCategory && this.activeCategory.name || '',
+        newCategoryName
+      }
+    }
+    this.storeService.update(am);
+  }
+
+  cancelEdit(){
+    //console.log("Cancel edit category")
+    const am:ActionModel = {
+      type: Action.CANCEL_EDIT,
+      pageName:this.refererPage || 'Category', 
+      data:{
+        categoryName:this.activeCategory && this.activeCategory.name || ''
+      }
     }
     this.storeService.update(am);
   }

@@ -31,7 +31,7 @@ export class LocationComponent implements OnInit, OnDestroy {
   ngOnInit() {
     
     /**
-     * Subscribe for actions from header toolbar
+     * Listen for store events
      */
     this.storeSubscription = this.storeService.store.subscribe(data => {
       if(this.checked && data && data.pageName === 'Locations'){
@@ -44,23 +44,29 @@ export class LocationComponent implements OnInit, OnDestroy {
           console.log("Edit Location", this.location.name);
         }
         /**
-         * Remove location
+         * Cancel edit location(disable edit mode)
          */
-        else if(data.type === Action.REMOVE){
-          // this.storeService.update(null);
-          // console.log("Remove Location", this.location.name);
-          // this.pendingDelete = true;
-          // //this.dataService.removeLocation(this.location);
-
-          // const am:ActionModel = Object.assign({}, data, {type:Action.CHANGE})
-          // this.storeService.update(am);
-
-        }else if(data.type === Action.NEW){
+        else if(data.type === Action.CANCEL_EDIT 
+          && data.data.locationName && data.data.locationName === this.location.name){
           this.storeService.update(null);
-
-        }else if(data.type === Action.COMPLETE && data.data.locationName && data.data.locationName === this.location.name){
           this.editMode = false;
-        }else if(data.type === Action.APPROVE_DELETE && Array.isArray(data.data) && data.data.indexOf(this.location.name) >= 0){
+        }
+        /**
+         * If action was completed (edit)
+         */
+        else if(data.type === Action.COMPLETE && data.data.locationName && data.data.locationName === this.location.name){
+          this.editMode = false;
+          const am: ActionModel = {
+            type:Action.CHANGE_SINGLE_LOCATION,
+            pageName:'Locations',
+            data:data.data
+          }
+          this.storeService.update(am);
+        }
+        /**
+         * Id deletion of a location was approved, delete it
+         */
+        else if(data.type === Action.APPROVE_DELETE && Array.isArray(data.data) && data.data.indexOf(this.location.name) >= 0){
           console.log(this.location.name + " Approved for deletion");
           this.dataService.removeLocation(this.location);
           const am:ActionModel = Object.assign({}, data, {type:Action.CHANGE})
@@ -85,6 +91,11 @@ export class LocationComponent implements OnInit, OnDestroy {
           type:Action.SHOW_ON_MAP,
           pageName:'Locations',
           data:{location:this.location}
+        },
+        cancelAction: {
+          type:Action.NAVIGATION,
+          pageName:'Locations',
+          data:{path:'/single-location/' + this.location.name}
         }
       }
     }
