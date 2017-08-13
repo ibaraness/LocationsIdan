@@ -9,6 +9,8 @@ import { StoreService } from "app/shared/services/store.service";
 import { Action } from "./../../constants/enums";
 import { BsModalRef, BsModalService } from "ngx-bootstrap";
 import { ConfirmModalComponent } from "app/shared/components/confirm-modal/confirm-modal.component";
+import { ModalComponent } from "app/shared/components/modal/modal.component";
+import { MapModalComponent } from "app/shared/components/map-modal/map-modal.component";
 
 @Component({
   selector: 'app-single-location-edit',
@@ -58,11 +60,37 @@ export class SingleLocationEditComponent implements OnInit, OnDestroy {
     });
   }
 
-  public openModal(title:string, content:string, action:ActionModel) {
+  public openConfirmationModal(title:string, content:string, action:ActionModel) {
     this.bsModalRef = this.modalService.show(ConfirmModalComponent);
     this.bsModalRef.content.title = title;
     this.bsModalRef.content.content = content;
     this.bsModalRef.content.action = action;
+  }
+
+  public openMapModal(){
+    this.bsModalRef = this.modalService.show(MapModalComponent);
+    const am:ActionModel = {
+      type:Action.COORDINATES_DONE,
+      pageName:this.refererPage || 'Location',
+      data:{
+        location:this.activeLocation 
+      }
+    }
+    this.bsModalRef.content.action = am;
+    this.bsModalRef.content.initialCoordinates = this.getCoordinatesObject(this.coordinates.value);
+    //console.log("Coordinates", this.getCoordinatesObject(this.coordinates.value)) 
+  }
+
+  private getCoordinatesObject(coordinatesStr:string){
+    const regex = /^[\-]?[0-9]+[\.]?[0-9]*[\,][\ ]?[\-]?[0-9]+[\.]?[0-9]*$/g;
+    if(coordinatesStr && regex.test(coordinatesStr)){
+      const sides = coordinatesStr.split(",");
+      return {
+        lat:+sides[0],
+        lng:+sides[1]
+      }
+    }
+    return null;
   }
   
   /**
@@ -101,20 +129,32 @@ export class SingleLocationEditComponent implements OnInit, OnDestroy {
         if(data.type === Action.COMPLETE){
           this.storeService.update(null);
           this.locationService.back();
-        }else if(data.type === Action.CONFIRM_OVERWRITE && data.data.location){
+        }
+        /**
+         * If overwrite confirm was made
+         */
+        else if(data.type === Action.CONFIRM_OVERWRITE && data.data.location){
           this.dataService.setLocation(data.data.location);
           this.complete();
-        }else if(data.type === Action.COORDINATES_DONE){
+        }
+        
+      }
+      else if(data && data.type === Action.COORDINATES_DONE){
+          console.log("Action.COORDINATES_DONE", data.data)
           const location = data.data.location;
-          if(location){
-            this.name.setValue(location.name || "");
-            this.address.setValue(location.address || "");
-            this.coordinates.setValue(location.coordinates || "");
-            this.category.setValue(location.category.length && location.category[0] || "");
-            this.dirtyProgramatically = true;
+          if(location && this.activeLocation && location.name === this.activeLocation.name){
+            // this.name.setValue(location.name || "");
+            // this.address.setValue(location.address || "");
+            this.coordinates.setValue(data.data.coordinates || "");
+            this.coordinates.markAsDirty();
+            // this.category.setValue(location.category.length && location.category[0] || "");
+            // this.dirtyProgramatically = true;
+          }else if(!this.activeLocation){
+            this.coordinates.setValue(data.data.coordinates || "");
+            this.coordinates.markAsDirty();
+            console.log("New location map")
           }
         }
-      }
     });
   }
 
@@ -157,7 +197,7 @@ export class SingleLocationEditComponent implements OnInit, OnDestroy {
           location
         }
       }
-      this.openModal("Location exist", "A location with that Name already exist! \n Do you want to ovewrite it?", am);
+      this.openConfirmationModal("Location exist", "A location with that Name already exist! \n Do you want to ovewrite it?", am);
     }
     /**
      * If we are editing existing location from the start
@@ -174,23 +214,6 @@ export class SingleLocationEditComponent implements OnInit, OnDestroy {
       this.complete(location.name);
       //alert("Location Was saved")
     }
-  }
-
-  getCoordinatesFromMap(){
-    const location:LocationModel = {
-      "name":this.name.value,
-      "address":this.address.value,
-      "coordinates":this.coordinates.value,
-      "category":[this.category.value]
-    };
-    const am:ActionModel = {
-      type: Action.SET_COORDINATES ,
-      pageName:this.refererPage || 'Location', 
-      data:{location}
-    }
-    this.router.navigate(['/map']).then(()=>{
-      this.storeService.update(am);
-    });
   }
 
   complete(newLocationName:string = null){

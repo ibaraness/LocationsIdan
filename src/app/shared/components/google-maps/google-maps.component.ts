@@ -1,4 +1,4 @@
-import { Component, OnInit, ElementRef, OnDestroy, NgZone } from '@angular/core';
+import { Component, OnInit, ElementRef, OnDestroy, NgZone, Input, Output, EventEmitter } from '@angular/core';
 import { DynamicScriptLoaderService } from "app/shared/services/dynamic-script-loader.service";
 import { StoreService } from "app/shared/services/store.service";
 import { ActionModel, LocationModel } from "app/models/interfaces";
@@ -19,6 +19,9 @@ export class GoogleMapsComponent implements OnInit, OnDestroy {
   public location:LocationModel;
   private editMode = false;
   private storeSubscription;
+  @Input() fromModal = false;
+  @Input() initialCoordinates:object;
+  @Output() onClick = new EventEmitter;
 
   constructor(
     private scriptLoader:DynamicScriptLoaderService,
@@ -43,10 +46,13 @@ export class GoogleMapsComponent implements OnInit, OnDestroy {
     let position = null;
     if(this.location){
       const pos = this.location.coordinates.split(",");
-      position = {
-        lat:+pos[0],
-        lng:+pos[1]
+      if(pos.length === 2 && isNaN(+pos[0]) && isNaN(+pos[1])){
+        this.initialCoordinates = {
+          lat:+pos[0],
+          lng:+pos[1]
+        }
       }
+      
     }
 
     this.storeSubscription = this.storeService.changes.subscribe(action => {
@@ -62,13 +68,13 @@ export class GoogleMapsComponent implements OnInit, OnDestroy {
     /**
      * Get Map instance
      */
-    this.gmServices.getMap(document.getElementById('google_maps_contnet')​, position).subscribe(map => {
+    this.gmServices.getMap(document.getElementById('google_maps_contnet')​, this.initialCoordinates).subscribe(map => {
       /**
        * Create marker
        */
       const marker = this.gmServices.addMarker(position || {lat: -34.397, lng: 150.644});
       //map.setZoom(18)
-      if(position){
+      if(this.initialCoordinates){
         map.setZoom(18);
       }
 
@@ -79,6 +85,7 @@ export class GoogleMapsComponent implements OnInit, OnDestroy {
         if(e){
           marker.setPosition(e.latLng);
           this.coordinates = "" + e.latLng.lat() + "," +  e.latLng.lng();
+          this.onClick.emit(this.coordinates);
         }
       });
 
@@ -109,9 +116,6 @@ export class GoogleMapsComponent implements OnInit, OnDestroy {
     })
   }
 
-  onMarkerChange(val){
-    this.coordinates = val;
-  }
   ngOnDestroy(): void {
     this.storeSubscription.unsubscribe();
   }

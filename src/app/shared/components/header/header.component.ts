@@ -25,6 +25,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   pageName:string;
   pageParam:string;
   private storeSubscription;
+  private modalIsActive = false;
 
   count = 0;
 
@@ -53,10 +54,26 @@ export class HeaderComponent implements OnInit, OnDestroy {
         /**
          * Show confirmation modal
          */
-        if(data && data.type === Action.SHOW_CONFIRM_MODAL){
-          //this.storeService.update(null);
+        if(data && data.type === Action.SHOW_CONFIRM_MODAL && !this.modalIsActive){
           console.log("SHOW_CONFIRM_MODAL", ++this.count)
+          this.modalIsActive = true;
+          setTimeout(()=>{
+              this.storeService.update({
+                type:Action.NULL,
+                pageName:'',
+                data
+              });
+          },100)
+          
           this.openModal(data.data.title,data.data.content, data.data.action, data.data.extraContent, data.data.cancelAction);
+        }
+
+        /**
+         * Release confirmation modal
+         */
+        if(data && data.type === Action.NULL){
+          console.log("Release_CONFIRM_MODAL", ++this.count)
+          this.modalIsActive = false;
         }
         /**
          * Show location on map

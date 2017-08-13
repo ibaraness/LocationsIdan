@@ -14,5 +14,6 @@ export enum Action {
     SHOW_CONFIRM_MODAL,
     SHOW_ON_MAP,
     SET_COORDINATES,
-    COORDINATES_DONE
+    COORDINATES_DONE,
+    NULL
 }

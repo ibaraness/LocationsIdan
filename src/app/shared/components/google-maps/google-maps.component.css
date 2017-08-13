@@ -7,6 +7,10 @@
     right: 0;
     position: fixed;
 }
+.map-container.from-modal {
+    position: static !important;
+    height: 400px;
+}
 #google_maps_contnet {
     height: 100%;
     width:100%;   

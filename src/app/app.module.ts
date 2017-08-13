@@ -25,7 +25,8 @@ import { DynamicScriptLoaderService } from "app/shared/services/dynamic-script-l
 import { GoogleMapsService } from "app/shared/services/google-maps.service";
 import { SingleCategoryEditComponent } from './pages/single-category-edit/single-category-edit.component';
 import { CategoryComponent } from './shared/components/category/category.component';
-
+import { MapModalComponent } from './shared/components/map-modal/map-modal.component';
+import { VibrationService} from './shared/services/vibration.service';
 
 @NgModule({
   declarations: [
@@ -42,8 +43,9 @@ import { CategoryComponent } from './shared/components/category/category.compone
     GoogleMapsComponent,
     SingleCategoryEditComponent,
     CategoryComponent,
+    MapModalComponent,
   ],
-  entryComponents:[ModalComponent, ConfirmModalComponent],
+  entryComponents:[ModalComponent, ConfirmModalComponent, MapModalComponent],
   imports: [
     BrowserModule,
     FormsModule,
@@ -58,7 +60,8 @@ import { CategoryComponent } from './shared/components/category/category.compone
     StoreService, 
     BsModalRef, 
     DynamicScriptLoaderService,
-    GoogleMapsService
+    GoogleMapsService,
+    VibrationService
   ],
   bootstrap: [AppComponent]
 })

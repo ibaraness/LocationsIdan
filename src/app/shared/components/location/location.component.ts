@@ -5,6 +5,7 @@ import { Action } from './../../../constants/enums';
 import { LocationModel, ActionModel } from "app/models/interfaces";
 import { DataService } from './../../../shared/services/data.service';
 import { EventEmitter, OnDestroy } from "@angular/core";
+import { VibrationService } from "app/shared/services/vibration.service";
 
 @Component({
   selector: 'app-location',
@@ -25,7 +26,8 @@ export class LocationComponent implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private storeService: StoreService,
-    private dataService: DataService
+    private dataService: DataService,
+    private vibrationService:VibrationService
   ) { }
 
   ngOnInit() {
@@ -80,7 +82,7 @@ export class LocationComponent implements OnInit, OnDestroy {
   }
 
   click(){
-    //data.data.title,data.data.content, data.data.action
+    this.vibrationService.vibrate(500);
     const am:ActionModel = {
       type:Action.SHOW_CONFIRM_MODAL,
       pageName:'Locations',

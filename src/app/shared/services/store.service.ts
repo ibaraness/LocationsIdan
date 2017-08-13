@@ -16,4 +16,8 @@ export class StoreService {
     this.store.next(value);
   }
 
+  recreate(){
+    this.store = new BehaviorSubject<ActionModel>(null);
+  }
+
 }
